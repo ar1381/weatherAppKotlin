@@ -1,6 +1,7 @@
 package data.model
 
 import data.api.LocalDateTimeSerializer
+import data.model.WeatherCondition
 import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 

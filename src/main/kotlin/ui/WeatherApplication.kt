@@ -7,7 +7,7 @@ import data.storage.HistoryStorage
 
 class WeatherApplication(
     private val weatherService: WeatherService,
-    private val historyStorage: HistoryStorage
+    private val historyStorage: HistoryStorage,
 ) {
     fun executeCommand(command: String) {
         val parts = command.split(" ")
@@ -25,12 +25,12 @@ class WeatherApplication(
 
                         when (result) {
                             is NetworkResult.Success -> {
-                                println("Weather Info: ${result.data}")
+                                println("Weather Info: location = ${result.data.location}, condition = ${result.data.condition}, time = ${result.data.requestTime}")
                                 historyStorage.saveSearch(result.data)
                             }
                             is NetworkResult.Error -> {
-//                                println("Error: ${result.exception.message}")
-                                println("Error")
+                                println("Error: ${result.exception}")
+                                println("Error 2")
                             }
                         }
                     }

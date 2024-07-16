@@ -2,6 +2,7 @@ package data.storage
 
 import data.model.WeatherCondition
 import data.model.WeatherInfo
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
@@ -14,7 +15,9 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.decodeFromString
 
 
-class HistoryStorageImpl(private val filePath: String) : HistoryStorage {
+class HistoryStorageImpl(private val filePath: String,
+                         private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+) : HistoryStorage {
     private val lock = ReentrantLock()
     private val file = File(filePath)
 
@@ -26,13 +29,13 @@ class HistoryStorageImpl(private val filePath: String) : HistoryStorage {
     }
 
     override suspend fun saveSearch(weatherInfo: WeatherInfo) {
-        val history = withContext(Dispatchers.IO){
+        val history = withContext(dispatcher){
             lock.withLock {
                 Json.decodeFromString<List<WeatherInfo>>(file.readText()).toMutableList()
             }
         }
         history.add(weatherInfo)
-        withContext(Dispatchers.IO){
+        withContext(dispatcher){
             lock.withLock {
                 file.writeText(Json.encodeToString(history))
             }
@@ -40,7 +43,7 @@ class HistoryStorageImpl(private val filePath: String) : HistoryStorage {
     }
 
     override suspend fun getSearchHistory(query: String?): List<WeatherInfo> {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             lock.withLock {
                 val history: List<WeatherInfo> = Json.decodeFromString(file.readText())
                 return@withLock if (query.isNullOrBlank()) {

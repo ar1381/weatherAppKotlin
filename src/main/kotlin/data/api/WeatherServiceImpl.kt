@@ -1,25 +1,31 @@
-package data.api
+package data.service
 
+import data.api.WeatherService
 import data.model.NetworkResult
 import data.model.WeatherCondition
 import data.model.WeatherInfo
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 
-class WeatherServiceImpl(private val apiKey: String) : WeatherService {
-    private val client = HttpClient()
+class WeatherServiceImpl(
+    private val apiKey:String,
+    private val client: HttpClient,
+    private val dispatcher: CoroutineDispatcher
+) : WeatherService {
 
     override suspend fun getWeatherByCity(cityName: String): NetworkResult<WeatherInfo> {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             try {
                 val response: HttpResponse = client.get("https://api.weatherapi.com/v1/current.json") {
                     parameter("key", apiKey)
                     parameter("q", cityName)
-                }
+                }.body()
                 val weatherInfo = parseResponse(response)
                 NetworkResult.Success(weatherInfo)
             } catch (e: Exception) {
@@ -29,7 +35,7 @@ class WeatherServiceImpl(private val apiKey: String) : WeatherService {
     }
 
     override suspend fun getWeatherByLatLong(lat: Float, long: Float): NetworkResult<WeatherInfo> {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             try {
                 val response: HttpResponse = client.get("https://api.weatherapi.com/v1/current.json") {
                     parameter("key", apiKey)
@@ -43,8 +49,45 @@ class WeatherServiceImpl(private val apiKey: String) : WeatherService {
         }
     }
 
-    private fun parseResponse(response: HttpResponse): WeatherInfo {
-        val condition = WeatherCondition("Sunny", 1000)
-        return WeatherInfo("Sample Location", condition, LocalDateTime.now())
+    private suspend fun parseResponse(response: HttpResponse): WeatherInfo {
+        // Parse the response JSON to create a WeatherInfo object
+        val jsonResponse = response.body<String>()
+        val json = kotlinx.serialization.json.Json {
+            ignoreUnknownKeys = true
+        }
+        val weatherApiResponse = json.decodeFromString(WeatherApiResponse.serializer(), jsonResponse)
+
+        val condition = WeatherCondition(
+            text = weatherApiResponse.current.condition.text,
+            code = weatherApiResponse.current.condition.code
+        )
+
+        return WeatherInfo(
+            location = weatherApiResponse.location.name,
+            condition = condition,
+            requestTime = LocalDateTime.now() // Replace this with the actual time from the response if available
+        )
     }
 }
+
+@Serializable
+data class WeatherApiResponse(
+    val location: Location,
+    val current: Current
+) {
+    @Serializable
+    data class Location(
+        val name: String
+    )
+
+    @Serializable
+    data class Current(
+        val condition: WeatherCondition
+    )
+}
+
+@Serializable
+data class WeatherCondition(
+    val text: String,
+    val code: Int
+)
