@@ -11,6 +11,7 @@ import io.ktor.client.statement.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import java.time.LocalDateTime
 
 class WeatherServiceImpl(
@@ -19,6 +20,9 @@ class WeatherServiceImpl(
     private val dispatcher: CoroutineDispatcher
 ) : WeatherService {
     val apiurl = "https://api.weatherapi.com/v1/current.json"
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
 
     override suspend fun getWeatherByCity(cityName: String): NetworkResult<WeatherInfo> {
         return withContext(dispatcher) {
@@ -44,6 +48,24 @@ class WeatherServiceImpl(
                 }
                 val weatherInfo = parseResponse(response)
                 NetworkResult.Success(weatherInfo)
+            } catch (e: Exception) {
+                NetworkResult.Error(e.message ?: "An error occurred")
+            }
+        }
+    }
+    suspend fun getWeatherByIP(): NetworkResult<WeatherInfo> {
+        return withContext(dispatcher) {
+            try {
+                val ipResponse: HttpResponse = client.get("https://api.ipify.org?format=json")
+                val ipResponseBody = ipResponse.body<String>()
+                val ip = json.decodeFromString<IpResponse>(ipResponseBody).ip
+
+                val locationResponse: HttpResponse = client.get("https://ipapi.co/$ip/json")
+                val locationResponseBody = locationResponse.body<String>()
+                val location = json.decodeFromString<LocationResponse>(locationResponseBody)
+                println(location)
+
+                return@withContext getWeatherByCity(location.city ?: "Tehran")
             } catch (e: Exception) {
                 NetworkResult.Error(e.message ?: "An error occurred")
             }
@@ -92,3 +114,9 @@ data class WeatherCondition(
     val text: String,
     val code: Int
 )
+
+@Serializable
+data class IpResponse(val ip: String)
+
+@Serializable
+data class LocationResponse(val city: String?)

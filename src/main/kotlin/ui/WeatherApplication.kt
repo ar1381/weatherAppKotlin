@@ -3,6 +3,7 @@ package app
 import kotlinx.coroutines.runBlocking
 import data.api.WeatherService
 import data.model.NetworkResult
+import data.service.WeatherServiceImpl
 import data.storage.HistoryStorage
 
 class WeatherApplication(
@@ -33,7 +34,22 @@ class WeatherApplication(
                             }
                         }
                     }
-                } else {
+                } else if((parts.size == 1) && (parts[0] == "getweather")) {
+                    runBlocking {
+                        val result = (weatherService as WeatherServiceImpl).getWeatherByIP()
+
+                        when (result) {
+                            is NetworkResult.Success -> {
+                                println("Weather Info: location = ${result.data.location}, condition = ${result.data.condition}, time =  ${result.data.requestTime}")
+                                historyStorage.saveSearch(result.data)
+                            }
+                            is NetworkResult.Error -> {
+                                println("Error: ${result.exception}")
+                            }
+                        }
+                    }
+                }
+                else {
                     println("Invalid command. Usage: getweather <city_name> or <lat,long>")
                 }
             }
