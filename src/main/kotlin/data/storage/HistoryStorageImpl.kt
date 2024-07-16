@@ -26,10 +26,14 @@ class HistoryStorageImpl(private val filePath: String) : HistoryStorage {
     }
 
     override suspend fun saveSearch(weatherInfo: WeatherInfo) {
-        withContext(Dispatchers.IO) {
+        val history = withContext(Dispatchers.IO){
             lock.withLock {
-                val history = getSearchHistory(null).toMutableList()
-                history.add(weatherInfo)
+                Json.decodeFromString<List<WeatherInfo>>(file.readText()).toMutableList()
+            }
+        }
+        history.add(weatherInfo)
+        withContext(Dispatchers.IO){
+            lock.withLock {
                 file.writeText(Json.encodeToString(history))
             }
         }
