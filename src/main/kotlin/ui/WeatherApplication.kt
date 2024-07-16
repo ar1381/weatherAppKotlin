@@ -25,12 +25,11 @@ class WeatherApplication(
 
                         when (result) {
                             is NetworkResult.Success -> {
-                                println("Weather Info: location = ${result.data.location}, condition = ${result.data.condition}, time = ${result.data.requestTime}")
+                                println("Weather Info: location = ${result.data.location}, condition = ${result.data.condition}, time =  ${result.data.requestTime}")
                                 historyStorage.saveSearch(result.data)
                             }
                             is NetworkResult.Error -> {
                                 println("Error: ${result.exception}")
-                                println("Error 2")
                             }
                         }
                     }

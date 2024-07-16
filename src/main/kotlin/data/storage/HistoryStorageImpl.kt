@@ -1,18 +1,14 @@
 package data.storage
 
-import data.model.WeatherCondition
 import data.model.WeatherInfo
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import java.io.File
-import java.time.LocalDateTime
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import kotlinx.serialization.json.Json
-
-import kotlinx.serialization.decodeFromString
 
 
 class HistoryStorageImpl(private val filePath: String,

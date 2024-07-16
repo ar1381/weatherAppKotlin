@@ -18,11 +18,12 @@ class WeatherServiceImpl(
     private val client: HttpClient,
     private val dispatcher: CoroutineDispatcher
 ) : WeatherService {
+    val apiurl = "https://api.weatherapi.com/v1/current.json"
 
     override suspend fun getWeatherByCity(cityName: String): NetworkResult<WeatherInfo> {
         return withContext(dispatcher) {
             try {
-                val response: HttpResponse = client.get("https://api.weatherapi.com/v1/current.json") {
+                val response: HttpResponse = client.get(apiurl) {
                     parameter("key", apiKey)
                     parameter("q", cityName)
                 }.body()
@@ -37,7 +38,7 @@ class WeatherServiceImpl(
     override suspend fun getWeatherByLatLong(lat: Float, long: Float): NetworkResult<WeatherInfo> {
         return withContext(dispatcher) {
             try {
-                val response: HttpResponse = client.get("https://api.weatherapi.com/v1/current.json") {
+                val response: HttpResponse = client.get(apiurl) {
                     parameter("key", apiKey)
                     parameter("q", "$lat,$long")
                 }
@@ -65,7 +66,7 @@ class WeatherServiceImpl(
         return WeatherInfo(
             location = weatherApiResponse.location.name,
             condition = condition,
-            requestTime = LocalDateTime.now() // Replace this with the actual time from the response if available
+            requestTime = LocalDateTime.now()
         )
     }
 }
