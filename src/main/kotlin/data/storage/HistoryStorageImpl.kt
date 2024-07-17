@@ -2,7 +2,6 @@ package data.storage
 
 import data.model.WeatherInfo
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import java.io.File
@@ -12,7 +11,7 @@ import kotlinx.serialization.json.Json
 
 
 class HistoryStorageImpl(private val filePath: String,
-                         private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+                         private val dispatcher: CoroutineDispatcher
 ) : HistoryStorage {
     private val lock = ReentrantLock()
     private val file = File(filePath)
