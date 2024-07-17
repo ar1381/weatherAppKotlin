@@ -3,7 +3,7 @@ package app
 import kotlinx.coroutines.runBlocking
 import data.api.WeatherService
 import data.model.NetworkResult
-import data.service.WeatherServiceImpl
+import data.api.WeatherServiceImpl
 import data.storage.HistoryStorage
 
 class WeatherApplication(

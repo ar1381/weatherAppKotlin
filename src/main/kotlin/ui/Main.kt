@@ -1,7 +1,7 @@
 package ui
 
 import app.WeatherApplication
-import data.service.WeatherServiceImpl
+import data.api.WeatherServiceImpl
 import data.storage.HistoryStorageImpl
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*

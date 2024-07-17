@@ -1,6 +1,5 @@
-package data.service
+package data.api
 
-import data.api.WeatherService
 import data.model.NetworkResult
 import data.model.WeatherCondition
 import data.model.WeatherInfo
@@ -22,6 +21,7 @@ class WeatherServiceImpl(
     val apiurl = "https://api.weatherapi.com/v1/current.json"
     private val json = Json {
         ignoreUnknownKeys = true
+        coerceInputValues = true
     }
 
     override suspend fun getWeatherByCity(cityName: String): NetworkResult<WeatherInfo> {
@@ -63,7 +63,6 @@ class WeatherServiceImpl(
                 val locationResponse: HttpResponse = client.get("https://ipapi.co/$ip/json")
                 val locationResponseBody = locationResponse.body<String>()
                 val location = json.decodeFromString<LocationResponse>(locationResponseBody)
-                println(location)
 
                 return@withContext getWeatherByCity(location.city ?: "Tehran")
             } catch (e: Exception) {
@@ -73,7 +72,6 @@ class WeatherServiceImpl(
     }
 
     private suspend fun parseResponse(response: HttpResponse): WeatherInfo {
-        // Parse the response JSON to create a WeatherInfo object
         val jsonResponse = response.body<String>()
         val json = kotlinx.serialization.json.Json {
             ignoreUnknownKeys = true
@@ -119,4 +117,11 @@ data class WeatherCondition(
 data class IpResponse(val ip: String)
 
 @Serializable
-data class LocationResponse(val city: String?)
+data class LocationResponse(
+    val ip: String = "",
+    val city: String = "",
+    val region: String = "",
+    val country: String = "",
+    val latitude: Float = 0f,
+    val longitude: Float = 0f
+)
