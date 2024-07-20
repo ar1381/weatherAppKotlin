@@ -25,10 +25,13 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:1.7.1")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.1")
-    testImplementation("io.mockk:mockk:1.10.6")
+
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.4.2")
-    testImplementation("io.ktor:ktor-client-mock:1.5.4")
     testImplementation("io.ktor:ktor-client-mock-jvm:1.5.4")
+
+    testImplementation("org.jetbrains.kotlin:kotlin-test:1.8.0")
+    testImplementation("io.ktor:ktor-client-mock:2.1.0")
+    testImplementation("io.mockk:mockk:1.12.0")
 }
 
 tasks.test {
